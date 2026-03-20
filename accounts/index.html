@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Account Dashboard – Schleswig-Netzwerk">
+    <title>Dashboard – Schleswig-Netzwerk</title>
+    <link rel="stylesheet" href="assets/css/accounts.css">
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper" id="dashboard" style="display:none;">
+        <div class="dashboard-header">
+            <div>
+                <div class="auth-logo" style="text-align:left; margin-bottom:8px;">
+                    <a href="/index.html"><span class="accent">SN</span> Schleswig-Netzwerk</a>
+                </div>
+                <h1>Mein <span style="color: var(--red);">Account</span></h1>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span class="user-badge" id="user-role">Spieler</span>
+                <button class="btn btn-outline" style="width:auto; padding:8px 16px; font-size:0.8rem;"
+                    onclick="logout()">Ausloggen</button>
+            </div>
+        </div>
+
+        <!-- 3-Step Verification -->
+        <div class="verify-steps" id="verify-steps">
+            <div class="verify-step" id="step-email">
+                <div class="step-icon locked" id="step-email-icon">&#x1F4E7;</div>
+                <h3>E-Mail verifiziert</h3>
+                <p class="step-status locked" id="step-email-status">Ausstehend</p>
+            </div>
+            <div class="verify-step" id="step-discord">
+                <div class="step-icon locked" id="step-discord-icon">&#x1F4AC;</div>
+                <h3>Discord verbunden</h3>
+                <p class="step-status locked" id="step-discord-status">Nicht verbunden</p>
+            </div>
+            <div class="verify-step" id="step-role">
+                <div class="step-icon locked" id="step-role-icon">&#x1F3AE;</div>
+                <h3>Discord Rolle</h3>
+                <p class="step-status locked" id="step-role-status">Ausstehend</p>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div id="action-area" style="margin-bottom: 32px;"></div>
+
+        <!-- Profile -->
+        <div class="profile-grid">
+            <div class="profile-card">
+                <h3>&#x1F464; Profil</h3>
+                <div class="profile-field">
+                    <div class="field-label">Nickname</div>
+                    <div class="field-value" id="profile-nickname">–</div>
+                </div>
+                <div class="profile-field">
+                    <div class="field-label">E-Mail</div>
+                    <div class="field-value" id="profile-email">–</div>
+                </div>
+                <div class="profile-field">
+                    <div class="field-label">Realer Name</div>
+                    <div class="field-value" id="profile-realname">–</div>
+                </div>
+                <div class="profile-field">
+                    <div class="field-label">Registriert</div>
+                    <div class="field-value" id="profile-created">–</div>
+                </div>
+            </div>
+            <div class="profile-card">
+                <h3>&#x1F4AC; Discord</h3>
+                <div class="profile-field">
+                    <div class="field-label">Discord Username</div>
+                    <div class="field-value" id="profile-discord">Nicht verbunden</div>
+                </div>
+                <div class="profile-field">
+                    <div class="field-label">Status</div>
+                    <div class="field-value" id="profile-discord-status">–</div>
+                </div>
+                <div style="margin-top: 20px;" id="discord-connect-area"></div>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--black-border);">
+            <p style="color: var(--gray-500); font-size: 0.85rem; margin-bottom: 12px;">
+                &#x26A0;&#xFE0F; Account löschen (DSGVO Art. 17) — Diese Aktion kann nicht rückgängig gemacht werden.
+            </p>
+            <button class="btn btn-danger" style="width: auto; padding: 10px 20px;" onclick="deleteAccount()">
+                Account löschen
+            </button>
+        </div>
+    </div>
+
+    <!-- Not logged in -->
+    <div class="auth-wrapper" id="not-logged-in" style="display:none;">
+        <div class="auth-logo">
+            <a href="/index.html"><span class="accent">SN</span> Schleswig-Netzwerk</a>
+        </div>
+        <div class="auth-card" style="text-align:center;">
+            <div style="font-size: 3rem; margin-bottom:16px;">&#x1F512;</div>
+            <h2>Nicht eingeloggt</h2>
+            <p class="subtitle">Du musst eingeloggt sein, um dein Dashboard zu sehen.</p>
+            <a href="login.html" class="btn btn-primary">Zum Login</a>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000';
+
+        async function loadDashboard() {
+            try {
+                const res = await fetch(`${API}/api/account/me`, { credentials: 'include' });
+                if (!res.ok) {
+                    document.getElementById('not-logged-in').style.display = 'block';
+                    return;
+                }
+                const user = await res.json();
+                document.getElementById('dashboard').style.display = 'block';
+                renderDashboard(user);
+            } catch (err) {
+                document.getElementById('not-logged-in').style.display = 'block';
+            }
+        }
+
+        function renderDashboard(user) {
+            // Profile
+            document.getElementById('profile-nickname').textContent = user.nickname;
+            document.getElementById('profile-email').textContent = user.email;
+            document.getElementById('profile-realname').textContent = user.real_name;
+            document.getElementById('profile-created').textContent = new Date(user.created_at).toLocaleDateString('de-DE');
+            document.getElementById('user-role').textContent = user.role.toUpperCase();
+
+            // Discord
+            if (user.discord_username) {
+                document.getElementById('profile-discord').textContent = user.discord_username;
+            }
+
+            // Step 1: Email
+            const emailIcon = document.getElementById('step-email-icon');
+            const emailStatus = document.getElementById('step-email-status');
+            const emailStep = document.getElementById('step-email');
+            if (user.is_email_verified) {
+                emailIcon.className = 'step-icon done';
+                emailIcon.innerHTML = '&#x2705;';
+                emailStatus.className = 'step-status done';
+                emailStatus.textContent = 'Bestätigt';
+                emailStep.classList.add('completed');
+            } else {
+                emailIcon.className = 'step-icon waiting';
+                emailStatus.className = 'step-status waiting';
+                emailStatus.textContent = 'Bestätigung ausstehend';
+                emailStep.classList.add('pending');
+            }
+
+            // Step 2: Discord
+            const discIcon = document.getElementById('step-discord-icon');
+            const discStatus = document.getElementById('step-discord-status');
+            const discStep = document.getElementById('step-discord');
+            if (user.is_discord_linked) {
+                discIcon.className = 'step-icon done';
+                discIcon.innerHTML = '&#x2705;';
+                discStatus.className = 'step-status done';
+                discStatus.textContent = 'Verbunden';
+                discStep.classList.add('completed');
+                document.getElementById('profile-discord-status').textContent = 'Verbunden';
+            } else {
+                discIcon.className = 'step-icon waiting';
+                discStatus.className = 'step-status waiting';
+                discStatus.textContent = 'Nicht verbunden';
+                discStep.classList.add('pending');
+                document.getElementById('profile-discord-status').textContent = 'Nicht verbunden';
+
+                // Discord Connect Button
+                if (user.is_email_verified) {
+                    document.getElementById('discord-connect-area').innerHTML =
+                        `<a href="${API}/api/account/discord/connect" class="btn btn-discord" style="font-size:0.85rem;padding:10px 20px;">Discord verbinden</a>`;
+                    document.getElementById('action-area').innerHTML =
+                        `<a href="${API}/api/account/discord/connect" class="btn btn-discord" style="max-width:350px;">&#x1F4AC; Jetzt Discord verbinden</a>`;
+                }
+            }
+
+            // Step 3: Discord Role
+            const roleIcon = document.getElementById('step-role-icon');
+            const roleStatus = document.getElementById('step-role-status');
+            const roleStep = document.getElementById('step-role');
+            if (user.is_discord_role_given) {
+                roleIcon.className = 'step-icon done';
+                roleIcon.innerHTML = '&#x2705;';
+                roleStatus.className = 'step-status done';
+                roleStatus.textContent = 'Rolle erhalten';
+                roleStep.classList.add('completed');
+            }
+
+            // Check for discord=linked URL param
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('discord') === 'linked') {
+                const action = document.getElementById('action-area');
+                action.innerHTML = '<div class="alert alert-success show">&#x2705; Discord erfolgreich verknüpft!</div>';
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch(`${API}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+            } catch (e) { }
+            window.location.href = 'login.html';
+        }
+
+        async function deleteAccount() {
+            if (!confirm('Bist du sicher? Dein Account und alle Daten werden unwiderruflich gelöscht.')) return;
+            if (!confirm('Letzte Warnung: Diese Aktion kann NICHT rückgängig gemacht werden!')) return;
+            try {
+                const res = await fetch(`${API}/api/account/me`, { method: 'DELETE', credentials: 'include' });
+                if (res.ok) {
+                    alert('Account gelöscht.');
+                    window.location.href = '/index.html';
+                }
+            } catch (err) {
+                alert('Fehler beim Löschen.');
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+
+</html>

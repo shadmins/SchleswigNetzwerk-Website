@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Mail bestätigen – Schleswig-Netzwerk</title>
+    <link rel="stylesheet" href="assets/css/accounts.css">
+</head>
+
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-logo">
+            <a href="/index.html"><span class="accent">SN</span> Schleswig-Netzwerk</a>
+        </div>
+
+        <div class="auth-card" style="text-align: center;">
+            <div id="verify-loading">
+                <div style="font-size: 3rem; margin-bottom: 16px;">&#x23F3;</div>
+                <h2>Verifizierung läuft...</h2>
+                <p class="subtitle">Bitte warte einen Moment.</p>
+            </div>
+
+            <div id="verify-success" style="display:none;">
+                <div style="font-size: 3rem; margin-bottom: 16px;">&#x2705;</div>
+                <h2>E-Mail bestätigt!</h2>
+                <p class="subtitle">Dein Account ist jetzt verifiziert. Du kannst dich einloggen und den nächsten
+                    Schritt machen.</p>
+                <a href="login.html" class="btn btn-primary" style="margin-top: 16px;">Zum Login</a>
+            </div>
+
+            <div id="verify-error" style="display:none;">
+                <div style="font-size: 3rem; margin-bottom: 16px;">&#x274C;</div>
+                <h2>Verifizierung fehlgeschlagen</h2>
+                <p class="subtitle" id="verify-error-msg">Der Link ist ungültig oder abgelaufen.</p>
+                <a href="/index.html" class="btn btn-outline" style="margin-top: 16px;">Zur Startseite</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000';
+
+        async function verify() {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+
+            if (!token) {
+                showError('Kein Verifizierungstoken gefunden.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/api/auth/verify-email?token=${encodeURIComponent(token)}`);
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('verify-loading').style.display = 'none';
+                    document.getElementById('verify-success').style.display = 'block';
+                } else {
+                    showError(data.error || 'Verifizierung fehlgeschlagen.');
+                }
+            } catch (err) {
+                showError('Verbindungsfehler. Ist der Server erreichbar?');
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('verify-loading').style.display = 'none';
+            document.getElementById('verify-error').style.display = 'block';
+            document.getElementById('verify-error-msg').textContent = msg;
+        }
+
+        verify();
+    </script>
+</body>
+
+</html>

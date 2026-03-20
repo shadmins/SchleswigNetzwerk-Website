@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Login – Schleswig-Netzwerk</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #f5f5f5;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: #141414;
+            border: 1px solid #e03030;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(224, 48, 48, 0.2);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #e03030;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .auth-header p {
+            margin: 8px 0 0;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .auth-body {
+            margin-bottom: 30px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background: rgba(224, 48, 48, 0.1);
+            border: 1px solid #e03030;
+            color: #ff6b6b;
+        }
+
+        .alert-info {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4caf50;
+            color: #81c784;
+        }
+
+        .btn-authentik {
+            width: 100%;
+            padding: 14px;
+            background: #e03030;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-authentik:hover {
+            background: #c72020;
+        }
+
+        .btn-authentik:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .auth-footer {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        .auth-footer a {
+            color: #e03030;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 14px;
+            color: #e03030;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>SN Editor</h1>
+            <p>Team-Login mit Authentik SSO</p>
+        </div>
+
+        <div class="auth-body">
+            <div class="alert alert-error" id="error-message"></div>
+            <div class="alert alert-info" id="info-message"></div>
+
+            <button id="authentik-btn" class="btn-authentik">
+                🔐 Mit Authentik anmelden
+            </button>
+
+            <div class="loading" id="loading">
+                Wird weitergeleitet...
+            </div>
+        </div>
+
+        <div class="auth-footer">
+            Zurück zur <a href="../index.html">Startseite</a>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.origin.includes('localhost')
+            ? 'http://localhost:3000'
+            : window.location.origin.replace(/edit.*/, '').replace(/\/$/, '');
+
+        const baseUrl = window.location.origin;
+        const redirectUri = baseUrl + window.location.pathname.replace('login.html', 'authentik-callback.html');
+
+        document.getElementById('authentik-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('authentik-btn');
+            const loading = document.getElementById('loading');
+            const errorMsg = document.getElementById('error-message');
+
+            btn.disabled = true;
+            loading.classList.add('show');
+            errorMsg.classList.remove('show');
+
+            try {
+                // Authentik Login initiieren
+                const res = await fetch(`${API}/api/auth/authentik/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        redirect_uri: redirectUri,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Authentik-Anmeldung fehlgeschlagen');
+                }
+
+                if (data.redirect_url) {
+                    // Redirect zu Authentik Login
+                    window.location.href = data.redirect_url;
+                } else {
+                    throw new Error('Keine Authentik-URL zurückgegeben');
+                }
+            } catch (err) {
+                console.error('Authentik Login Error:', err);
+                errorMsg.textContent = err.message || 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.';
+                errorMsg.classList.add('show');
+
+                btn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+
+        // Prüfe ob von Authentik-Callback kommend
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('token')) {
+            const token = params.get('token');
+            sessionStorage.setItem('auth_token', token);
+            document.getElementById('info-message').textContent = 'Login erfolgreich! Wird weitergeleitet...';
+            document.getElementById('info-message').classList.add('show');
+            setTimeout(() => {
+                window.location.href = './index.html';
+            }, 1500);
+        }
+    </script>
+</body>
+
+</html>

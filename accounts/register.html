@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Registrierung – Schleswig-Netzwerk">
+    <title>Registrieren – Schleswig-Netzwerk</title>
+    <link rel="stylesheet" href="assets/css/accounts.css">
+</head>
+
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-logo">
+            <a href="/index.html"><span class="accent">SN</span> Schleswig-Netzwerk</a>
+        </div>
+
+        <div class="auth-card">
+            <h2>Account erstellen</h2>
+            <p class="subtitle">Registriere dich und werde Teil des Netzwerks</p>
+
+            <div class="alert alert-error" id="register-error"></div>
+            <div class="alert alert-success" id="register-success"></div>
+
+            <form id="register-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nickname">Spieler-Nickname</label>
+                        <input type="text" class="form-control" id="nickname" placeholder="DeinNickname" required
+                            minlength="3" maxlength="32" pattern="[a-zA-Z0-9_\-]+">
+                        <p class="form-hint">3–32 Zeichen, Buchstaben, Zahlen, _ und -</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="real_name">Realer Name</label>
+                        <input type="text" class="form-control" id="real_name" placeholder="Max Mustermann" required
+                            minlength="2" maxlength="128">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-Mail-Adresse</label>
+                    <input type="email" class="form-control" id="email" placeholder="deine@email.de" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input type="password" class="form-control" id="password" placeholder="Mindestens 8 Zeichen"
+                        required minlength="8">
+                    <p class="form-hint">Min. 8 Zeichen, 1 Großbuchstabe, 1 Zahl</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirm">Passwort bestätigen</label>
+                    <input type="password" class="form-control" id="password_confirm" placeholder="Passwort wiederholen"
+                        required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 28px;">
+                    <label
+                        style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; text-transform:none; letter-spacing:0;">
+                        <input type="checkbox" id="accept-privacy" required
+                            style="margin-top:4px; accent-color: var(--red);">
+                        <span style="font-size:0.85rem; color: var(--gray-400);">
+                            Ich habe die <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen
+                            und akzeptiere sie.
+                            Ich bestätige, dass ich mindestens 18 Jahre alt bin.
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="register-btn">Account erstellen</button>
+            </form>
+        </div>
+
+        <div class="auth-footer">
+            Bereits registriert? <a href="login.html">Jetzt einloggen</a>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000';
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errEl = document.getElementById('register-error');
+            const succEl = document.getElementById('register-success');
+            const btn = document.getElementById('register-btn');
+
+            errEl.classList.remove('show');
+            succEl.classList.remove('show');
+
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirm').value;
+
+            if (password !== confirm) {
+                errEl.textContent = 'Passwörter stimmen nicht überein.';
+                errEl.classList.add('show');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Wird erstellt...';
+
+            try {
+                const res = await fetch(`${API}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password,
+                        nickname: document.getElementById('nickname').value,
+                        real_name: document.getElementById('real_name').value,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    const msg = data.errors
+                        ? data.errors.map(e => e.msg).join(', ')
+                        : data.error || 'Registrierung fehlgeschlagen';
+                    errEl.textContent = msg;
+                    errEl.classList.add('show');
+                } else {
+                    document.getElementById('register-form').style.display = 'none';
+                    succEl.innerHTML = '✅ ' + data.message;
+                    succEl.classList.add('show');
+                }
+            } catch (err) {
+                errEl.textContent = 'Verbindungsfehler. Ist der Server gestartet?';
+                errEl.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Account erstellen';
+            }
+        });
+    </script>
+</body>
+
+</html>

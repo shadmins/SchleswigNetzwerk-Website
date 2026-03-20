@@ -1,0 +1,42 @@
+# ============================================================
+# URL Rewriting - Clean URLs für die Website
+# ============================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Entferne .html Extension
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^([^\.]+)$ $1.html [NC,L]
+    
+    # Redirect index.html zur Root
+    RewriteRule ^index\.html$ / [R=301,L]
+    
+    # Redirect frontend/index.html zu Root
+    RewriteRule ^frontend/index\.html$ / [R=301,L]
+    
+    # Cache Control für Static Assets
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|css|js|svg)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+</IfModule>
+
+# ============================================================
+# Compression & Performance
+# ============================================================
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+</IfModule>
+
+# ============================================================
+# Security Headers
+# ============================================================
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>

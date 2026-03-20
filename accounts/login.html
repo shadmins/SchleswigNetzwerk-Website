@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login – Schleswig-Netzwerk">
+    <title>Login – Schleswig-Netzwerk</title>
+    <link rel="stylesheet" href="assets/css/accounts.css">
+</head>
+
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-logo">
+            <a href="/index.html"><span class="accent">SN</span> Schleswig-Netzwerk</a>
+        </div>
+
+        <div class="auth-card">
+            <h2>Einloggen</h2>
+            <p class="subtitle">Willkommen zurück auf dem Netzwerk</p>
+
+            <div class="alert alert-error" id="login-error"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">E-Mail-Adresse</label>
+                    <input type="email" class="form-control" id="email" placeholder="deine@email.de" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input type="password" class="form-control" id="password" placeholder="Dein Passwort" required>
+                </div>
+
+                <div style="text-align:right; margin-bottom: 20px;">
+                    <a href="forgot-password.html" style="font-size: 0.85rem; color: var(--gray-400);">Passwort
+                        vergessen?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="login-btn">Einloggen</button>
+            </form>
+        </div>
+
+        <div class="auth-footer">
+            Noch kein Account? <a href="register.html">Jetzt registrieren</a>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000';
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errEl = document.getElementById('login-error');
+            const btn = document.getElementById('login-btn');
+            errEl.classList.remove('show');
+
+            btn.disabled = true;
+            btn.textContent = 'Wird eingeloggt...';
+
+            try {
+                const res = await fetch(`${API}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errEl.textContent = data.error || 'Login fehlgeschlagen';
+                    errEl.classList.add('show');
+                } else {
+                    // Redirect zum Dashboard
+                    window.location.href = 'index.html';
+                }
+            } catch (err) {
+                errEl.textContent = 'Verbindungsfehler. Ist der Server gestartet?';
+                errEl.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Einloggen';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+{
+    "name": "schleswig-netzwerk-bot",
+    "version": "1.0.0",
+    "description": "Discord Bot für das Schleswig-Netzwerk – Automatische Rollenverifikation",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "node src/index.js",
+        "dev": "nodemon src/index.js"
+    },
+    "dependencies": {
+        "discord.js": "^14.17.0",
+        "dotenv": "^16.4.7",
+        "mysql2": "^3.12.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.9"
+    }
+}

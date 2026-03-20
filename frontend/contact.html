@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Schleswig-Netzwerk – Kontaktiere uns.">
+    <link rel="icon" type="image/png" href="assets/img/image-removebg-preview.png">
+    <title>SchleswigNetzwerk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo"><img src="assets/img/image-removebg-preview.png" alt="Schleswig-Netzwerk" style="height: 50px; width: auto; margin-right: 8px;"> Schleswig-Netzwerk</a>
+            <div class="nav-toggle"><span></span><span></span><span></span></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="features.html">Features</a></li>
+                <li><a href="dev-status.html">Development</a></li>
+                <li><a href="team.html">Team</a></li>
+                <li><a href="partner.html">Partner</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html" class="active">Kontakt</a></li>
+                <li><a href="https://discord.gg/EEFFbwSC" class="btn btn-primary" style="padding:8px 20px;font-size:0.85rem" target="_blank" rel="noopener noreferrer">Discord</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero" style="min-height: 50vh;">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 3.5rem);"><span class="text-red">Kontakt</span>
+            </h1>
+            <p class="hero-subtitle">Schreib uns — wir freuen uns auf dich</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container" style="max-width: 700px;">
+            <div class="section-header reveal">
+                <h2>Kontakt aufnehmen</h2>
+                <div class="accent-line"></div>
+            </div>
+
+            <div class="card reveal" style="padding: var(--gap-xl);">
+                <form id="contact-form">
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="contact-name">Name</label>
+                            <input type="text" class="form-control" id="contact-name" placeholder="Dein Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">E-Mail</label>
+                            <input type="email" class="form-control" id="contact-email" placeholder="deine@email.de"
+                                required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-subject">Betreff</label>
+                        <select class="form-control" id="contact-subject">
+                            <option value="allgemein">Allgemeine Anfrage</option>
+                            <option value="bewerbung">Team-Bewerbung</option>
+                            <option value="partnerschaft">Partnerschaft</option>
+                            <option value="bug">Fehler melden</option>
+                            <option value="sonstiges">Sonstiges</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-message">Nachricht</label>
+                        <textarea class="form-control" id="contact-message" placeholder="Deine Nachricht..."
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Nachricht senden</button>
+                </form>
+
+                <div id="contact-success" style="display:none; text-align:center; padding: var(--gap-lg);">
+                    <div style="font-size:3rem; margin-bottom: var(--gap-md);">&#x2705;</div>
+                    <h3 style="color: var(--white); margin-bottom: var(--gap-sm);">Nachricht gesendet!</h3>
+                    <p style="color: var(--gray-400);">Wir melden uns schnellstmöglich bei dir.</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: var(--gap-xl);" class="reveal">
+                <p style="color: var(--gray-400); margin-bottom: var(--gap-sm);">Oder direkt über Discord:</p>
+                <a href="#" class="btn btn-outline">&#x1F4AC; Discord Server</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Schleswig-Netzwerk. Alle Rechte vorbehalten.</p>
+                <span class="age-notice">&#x1F6AB; USK 18</span>
+                <div><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></div>
+            </div>
+        </div>
+    </footer>
+    <script defer src="assets/js/main.js"></script>
+    <script>
+        document.getElementById('contact-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            // TODO: API-Call implementieren
+            this.style.display = 'none';
+            document.getElementById('contact-success').style.display = 'block';
+        });
+    </script>
+</body>
+
+</html>
