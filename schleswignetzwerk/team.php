@@ -16,17 +16,17 @@ $username = $loggedIn ? ($_SESSION['username'] ?? 'User') : null;
 </head>
 <body>
     <nav class="navbar">
-        <a href="/" class="logo"><img src="1.png" alt="SchleswigNetzwerk" height="35"></a>
+        <a href="index.html" class="logo">SchleswigNetzwerk</a>
         <ul class="nav-links">
-            <li><a href="/">Startseite</a></li>
-            <li><a href="/features">Features</a></li>
-            <li><a href="/team">Team</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/impressum">Impressum</a></li>
+            <li><a href="index.html">Startseite</a></li>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="team.html">Team</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="impressum.html">Impressum</a></li>
             <?php if ($loggedIn): ?>
-                <li><a href="/logout" class="btn-discord-nav" style="background: var(--red);">Logout (<?= htmlspecialchars($username) ?>)</a></li>
+                <li><a href="logout.php" class="btn-discord-nav" style="background: var(--red);">Logout (<?= htmlspecialchars($username) ?>)</a></li>
             <?php else: ?>
-                <li><a href="https://discord.gg/S567ad8B" class="btn-discord-nav" target="_blank">Discord beitreten</a></li>
+                <li><a href="#" class="btn-discord-nav">Discord beitreten</a></li>
             <?php endif; ?>
         </ul>
     </nav>
@@ -96,8 +96,6 @@ $username = $loggedIn ? ($_SESSION['username'] ?? 'User') : null;
     <footer class="footer">
         <p>&copy; 2026 SchleswigNetzwerk. Alle Rechte vorbehalten.</p>
     </footer>
-
-    <?php include 'cookie-banner.php'; ?>
 
     <script src="script.js"></script>
 </body>

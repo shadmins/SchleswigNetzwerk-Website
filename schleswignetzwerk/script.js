@@ -108,22 +108,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }, index * 100);
     });
 });
-
-// Cookie Banner
-const cookieBanner = document.getElementById('cookie-banner');
-const cookieAccept = document.getElementById('cookie-accept');
-
-if (cookieBanner && cookieAccept) {
-    const cookieAccepted = localStorage.getItem('cookieAccepted');
-    
-    if (cookieAccepted) {
-        cookieBanner.classList.add('hidden');
-    } else {
-        cookieBanner.classList.remove('hidden');
-    }
-    
-    cookieAccept.addEventListener('click', () => {
-        localStorage.setItem('cookieAccepted', 'true');
-        cookieBanner.classList.add('hidden');
-    });
-}

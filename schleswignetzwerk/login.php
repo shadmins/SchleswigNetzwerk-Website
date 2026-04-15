@@ -4,7 +4,7 @@ require_once 'config.php';
 $loggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 
 if ($loggedIn) {
-    header('Location: /');
+    header('Location: index.php');
     exit;
 }
 ?>
@@ -20,14 +20,14 @@ if ($loggedIn) {
 </head>
 <body>
     <nav class="navbar">
-        <a href="/" class="logo"><img src="1.png" alt="SchleswigNetzwerk" height="35"></a>
+        <a href="index.html" class="logo">SchleswigNetzwerk</a>
         <ul class="nav-links">
-            <li><a href="/">Startseite</a></li>
-            <li><a href="/features">Features</a></li>
-            <li><a href="/team">Team</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/impressum">Impressum</a></li>
-            <li><a href="https://discord.gg/S567ad8B" class="btn-discord-nav" target="_blank">Discord beitreten</a></li>
+            <li><a href="index.html">Startseite</a></li>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="team.html">Team</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="impressum.html">Impressum</a></li>
+            <li><a href="#" class="btn-discord-nav">Discord beitreten</a></li>
         </ul>
     </nav>
 
@@ -64,8 +64,5 @@ if ($loggedIn) {
             window.location.href = discordAuthUrl;
         });
     </script>
-
-    <?php include 'cookie-banner.php'; ?>
-
 </body>
 </html>
